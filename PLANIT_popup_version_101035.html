@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLANIT 🪐</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --ink:#1a1a2e;
+  --bg:#fef9f0;
+  --surface:#ffffff;
+  --muted:#9b97b2;
+  --r1:#ff6b6b; --r1l:#fff0f0;
+  --r2:#ffd166; --r2l:#fff8e6;
+  --r3:#06d6a0; --r3l:#e6fff8;
+  --r4:#118ab2; --r4l:#e6f4f8;
+  --r5:#ff9a3c; --r5l:#fff3e6;
+  --r6:#c77dff; --r6l:#f5e6ff;
+  --r7:#f72585; --r7l:#ffe6f3;
+}
+
+body {
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  padding:0;
+}
+
+/* squiggly background blobs */
+body::before {
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 600px 400px at 10% 0%,#ffd16622 0%,transparent 70%),
+    radial-gradient(ellipse 500px 350px at 90% 100%,#c77dff22 0%,transparent 70%),
+    radial-gradient(ellipse 400px 300px at 50% 50%,#06d6a011 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+.app{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:28px 20px 60px}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.logo{font-family:'Baloo 2',cursive;font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1;
+  background:linear-gradient(135deg,var(--r1),var(--r6));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo sup{font-size:14px;-webkit-text-fill-color:var(--r6)}
+.hdr-mid{display:flex;align-items:center;gap:8px;margin-left:auto}
+.nav{width:36px;height:36px;border-radius:50%;border:2.5px solid var(--ink);background:var(--surface);
+  font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900;
+  transition:all .15s;color:var(--ink)}
+.nav:hover{background:var(--ink);color:#fff;transform:scale(1.1)}
+.month-title{font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;min-width:220px;text-align:center;
+  color:var(--ink);letter-spacing:-.5px}
+.add-btn{display:flex;align-items:center;gap:7px;background:var(--ink);color:#fff;border:none;
+  border-radius:40px;padding:10px 20px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;
+  cursor:pointer;transition:all .18s;letter-spacing:.3px;white-space:nowrap}
+.add-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,26,46,.25)}
+.add-btn svg{flex-shrink:0}
+
+/* ── CATEGORY CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+.chip{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:40px;border:2px solid transparent;
+  font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.2px}
+.chip:hover{transform:translateY(-1px)}
+.chip.dim{opacity:.4}
+.chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── WEEKDAY ROW ── */
+.wdays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px}
+.wd{text-align:center;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  padding:5px 0;color:var(--muted)}
+
+/* ── CALENDAR GRID ── */
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+
+.cell{
+  background:var(--surface);
+  border-radius:14px;
+  min-height:106px;
+  padding:8px 7px 6px;
+  cursor:pointer;
+  transition:all .15s;
+  border:2px solid transparent;
+  position:relative;
+  overflow:hidden;
+}
+.cell::after{content:'';position:absolute;inset:0;border-radius:12px;
+  opacity:0;background:var(--ink);transition:opacity .12s;pointer-events:none}
+.cell:hover::after{opacity:.03}
+.cell:hover{border-color:#e0ddf5;transform:translateY(-2px);box-shadow:0 6px 20px rgba(26,26,46,.08)}
+.cell.faded{background:#f9f8fb;opacity:.5}
+.cell.faded:hover{opacity:.7}
+.cell.is-today{border-color:var(--ink) !important;box-shadow:0 0 0 3px rgba(26,26,46,.1)}
+
+.dnum{font-family:'Baloo 2',cursive;font-size:15px;font-weight:700;line-height:1;margin-bottom:5px;
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--ink)}
+.is-today .dnum{background:var(--ink);color:#fff}
+
+.pill{font-size:10.5px;font-weight:700;border-radius:7px;padding:2px 6px;margin-bottom:2px;
+  cursor:pointer;transition:opacity .1s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  display:block;line-height:1.5}
+.pill:hover{opacity:.75}
+.xmore{font-size:10px;font-weight:800;color:var(--muted);padding-left:2px;margin-top:1px}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(26,26,46,.45);
+  backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:20px}
+.overlay.on{display:flex}
+
+.modal{background:var(--surface);border-radius:28px;padding:30px 28px;width:100%;max-width:420px;
+  box-shadow:0 30px 80px rgba(26,26,46,.25);animation:pop .22s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pop{from{transform:scale(.82);opacity:0}to{transform:scale(1);opacity:1}}
+
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-hdr h2{font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:var(--ink)}
+.close-btn{width:32px;height:32px;border-radius:50%;border:2px solid #eee;background:transparent;
+  font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;color:var(--muted)}
+.close-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.fg{margin-bottom:15px}
+.fg label{display:block;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--muted);margin-bottom:6px}
+.fg input,.fg textarea{width:100%;padding:10px 13px;border:2px solid #eeedf5;border-radius:12px;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:var(--ink);background:#fafafa;
+  outline:none;transition:border-color .15s}
+.fg input:focus,.fg textarea:focus{border-color:var(--ink);background:#fff}
+.fg textarea{resize:none;height:58px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* color picker row */
+.cpicks{display:flex;gap:8px;flex-wrap:wrap}
+.cpick{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;
+  transition:all .16s;flex-shrink:0}
+.cpick:hover{transform:scale(1.15)}
+.cpick.sel{border-color:var(--ink);transform:scale(1.18)}
+
+.mfooter{display:flex;gap:9px;margin-top:6px}
+.btn-cancel{flex:0;padding:11px 18px;border-radius:40px;border:2px solid #eee;background:transparent;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;color:var(--muted);
+  transition:all .15s}
+.btn-cancel:hover{border-color:var(--ink);color:var(--ink)}
+.btn-del{flex:0;padding:11px 18px;border-radius:40px;border:2px solid #ffe0e0;background:#fff5f5;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;color:var(--r1);
+  transition:all .15s;display:none}
+.btn-del:hover{background:var(--r1);color:#fff;border-color:var(--r1)}
+.btn-save{flex:1;padding:12px;border-radius:40px;border:none;background:var(--ink);color:#fff;
+  font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;
+  letter-spacing:.3px}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,26,46,.3)}
+
+/* error shake */
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .3s ease}
+
+
+/* ── DAY EVENTS POPUP ── */
+.day-popup{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(26,26,46,.45);
+  backdrop-filter:blur(6px);
+  z-index:300;
+  align-items:flex-end;
+  justify-content:center;
+  padding:18px;
+}
+.day-popup.on{display:flex}
+
+.day-card{
+  background:var(--surface);
+  width:100%;
+  max-width:460px;
+  border-radius:28px 28px 20px 20px;
+  padding:22px 18px 18px;
+  max-height:78vh;
+  overflow:auto;
+  animation:pop .2s ease;
+  box-shadow:0 25px 60px rgba(26,26,46,.25);
+}
+
+.day-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+}
+
+.day-top h3{
+  font-family:'Baloo 2',cursive;
+  font-size:22px;
+}
+
+.day-events{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.day-item{
+  border-radius:16px;
+  padding:12px;
+  cursor:pointer;
+  transition:all .15s;
+  border:2px solid transparent;
+}
+
+.day-item:hover{
+  transform:translateY(-1px);
+}
+
+.day-item-title{
+  font-size:14px;
+  font-weight:800;
+  margin-bottom:4px;
+}
+
+.day-item-time{
+  font-size:11px;
+  font-weight:800;
+  opacity:.8;
+  margin-bottom:5px;
+}
+
+.day-item-note{
+  font-size:12px;
+  line-height:1.5;
+  opacity:.9;
+}
+
+.day-empty{
+  text-align:center;
+  padding:18px;
+  color:var(--muted);
+  font-weight:700;
+}
+
+.day-add-btn{
+  margin-top:14px;
+  width:100%;
+  border:none;
+  border-radius:18px;
+  padding:13px;
+  background:var(--ink);
+  color:white;
+  font-weight:800;
+  cursor:pointer;
+}
+
+
+@media(max-width:600px){
+  .cell{min-height:72px;padding:5px 4px}
+  .dnum{font-size:12px;width:22px;height:22px}
+  .pill{font-size:9px}
+  .month-title{font-size:17px;min-width:160px}
+  .logo{font-size:24px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="hdr">
+    <div class="logo">PLANIT<sup>🪐</sup></div>
+    <div class="hdr-mid">
+      <button class="nav" onclick="shiftMonth(-1)">‹</button>
+      <div class="month-title" id="mTitle"></div>
+      <button class="nav" onclick="shiftMonth(1)">›</button>
+    </div>
+    <button class="add-btn" onclick="openNew()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <line x1="7" y1="1" x2="7" y2="13" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="1" y1="7" x2="13" y2="7" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      New Event
+    </button>
+  </div>
+
+  <!-- Category filter chips -->
+  <div class="chips" id="chips"></div>
+
+  <!-- Weekday labels -->
+  <div class="wdays">
+    <div class="wd">Sun</div><div class="wd">Mon</div><div class="wd">Tue</div>
+    <div class="wd">Wed</div><div class="wd">Thu</div><div class="wd">Fri</div><div class="wd">Sat</div>
+  </div>
+
+  <!-- Calendar -->
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="bgClose(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2 id="mHead">New Event</h2>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="fg">
+      <label>What's happening?</label>
+      <input id="fTitle" placeholder="e.g. Morning run, Team sync…" maxlength="60"/>
+    </div>
+    <div class="fg row2">
+      <div>
+        <label>Date</label>
+        <input id="fDate" type="date"/>
+      </div>
+      <div>
+        <label>Time (optional)</label>
+        <input id="fTime" type="time"/>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Color / Category</label>
+      <div class="cpicks" id="cpicks"></div>
+    </div>
+    <div class="fg">
+      <label>Note (optional)</label>
+      <textarea id="fNote" placeholder="Any extra details…"></textarea>
+    </div>
+    <div class="mfooter">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-del" id="bDel" onclick="deleteEv()">Delete</button>
+      <button class="btn-save" onclick="saveEv()">Save →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Day Events Popup -->
+<div class="day-popup" id="dayPopup" onclick="closeDayPopup(event)">
+  <div class="day-card">
+    <div class="day-top">
+      <h3 id="dayPopupTitle">Events</h3>
+      <button class="close-btn" onclick="hideDayPopup()">✕</button>
+    </div>
+
+    <div class="day-events" id="dayEvents"></div>
+
+    <button class="day-add-btn" id="dayAddBtn">+ Add New Event</button>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const COLORS = [
+  {name:'Tomato',  hex:'#ff6b6b', bg:'#fff0f0'},
+  {name:'Sunny',   hex:'#ffd166', bg:'#fff8e6'},
+  {name:'Mint',    hex:'#06d6a0', bg:'#e6fff8'},
+  {name:'Ocean',   hex:'#118ab2', bg:'#e6f4f8'},
+  {name:'Tangy',   hex:'#ff9a3c', bg:'#fff3e6'},
+  {name:'Grape',   hex:'#c77dff', bg:'#f5e6ff'},
+  {name:'Berry',   hex:'#f72585', bg:'#ffe6f3'},
+];
+
+let evs = JSON.parse(localStorage.getItem('planit_v2') || 'null');
+if (!evs) {
+  // seed demo data
+  const t = new Date(), y = t.getFullYear(), mo = t.getMonth()+1;
+  const p = (n) => String(n).padStart(2,'0');
+  const dim = new Date(y, mo, 0).getDate();
+  const safe = (d) => d >= 1 && d <= dim;
+  const dd = t.getDate();
+  evs = [
+    {id:'s1',title:'Morning run 🏃',date:`${y}-${p(mo)}-${p(dd)}`,time:'06:30',col:2,note:'5k target'},
+    {id:'s2',title:'Team standup',date:`${y}-${p(mo)}-${p(dd)}`,time:'09:00',col:3,note:''},
+    safe(dd+1)?{id:'s3',title:"Priya's birthday 🎂",date:`${y}-${p(mo)}-${p(dd+1)}`,time:'',col:6,note:'Order cake'}:null,
+    safe(dd+2)?{id:'s4',title:'Dentist appt',date:`${y}-${p(mo)}-${p(dd+2)}`,time:'11:00',col:0,note:''}:null,
+    safe(dd+4)?{id:'s5',title:'Project deadline 🔥',date:`${y}-${p(mo)}-${p(dd+4)}`,time:'17:00',col:1,note:'Submit final build'}:null,
+    safe(dd+6)?{id:'s6',title:'Movie night 🎬',date:`${y}-${p(mo)}-${p(dd+6)}`,time:'20:00',col:5,note:''}:null,
+    safe(dd+9)?{id:'s7',title:'Weekend hike ⛰️',date:`${y}-${p(mo)}-${p(dd+9)}`,time:'07:00',col:2,note:'Wear good shoes'}:null,
+    safe(dd+13)?{id:'s8',title:'Flight to Mumbai ✈️',date:`${y}-${p(mo)}-${p(dd+13)}`,time:'06:00',col:4,note:'Check in online'}:null,
+  ].filter(Boolean);
+  persist();
+}
+
+let cur = {y: new Date().getFullYear(), m: new Date().getMonth()};
+let editId = null, selCol = 0;
+let activeFilters = new Set(COLORS.map((_,i)=>i)); // all on
+
+function persist() { localStorage.setItem('planit_v2', JSON.stringify(evs)); }
+function fmtDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function todayStr() { return fmtDate(new Date()); }
+
+// ── CHIPS ─────────────────────────────────────────────────────────────────────
+function renderChips() {
+  const el = document.getElementById('chips');
+  el.innerHTML = COLORS.map((c,i) => `
+    <div class="chip ${activeFilters.has(i)?'':'dim'}"
+      style="background:${activeFilters.has(i)?c.bg:'#f0f0f0'};border-color:${activeFilters.has(i)?c.hex:'transparent'};color:${c.hex}"
+      onclick="toggleFilter(${i})">
+      <div class="chip-dot" style="background:${c.hex}"></div>
+      ${c.name}
+    </div>`).join('');
+}
+
+function toggleFilter(i) {
+  if (activeFilters.has(i)) {
+    if (activeFilters.size === 1) { activeFilters = new Set(COLORS.map((_,j)=>j)); }
+    else activeFilters.delete(i);
+  } else { activeFilters.add(i); }
+  renderChips(); renderGrid();
+}
+
+// ── GRID ──────────────────────────────────────────────────────────────────────
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function renderGrid() {
+  document.getElementById('mTitle').textContent = `${MONTHS[cur.m]} ${cur.y}`;
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const first = new Date(cur.y, cur.m, 1);
+  const last  = new Date(cur.y, cur.m+1, 0);
+  const today = todayStr();
+  const startOffset = first.getDay();
+
+  function addCell(date, faded) {
+    const ds = fmtDate(date);
+    const dayEvs = evs
+      .filter(e => e.date === ds && activeFilters.has(e.col))
+      .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+
+    const cell = document.createElement('div');
+    cell.className = `cell${faded?' faded':''}${ds===today?' is-today':''}`;
+    cell.onclick = () => showDayPopup(ds);
+
+    const dn = document.createElement('div');
+    dn.className = 'dnum';
+    dn.textContent = date.getDate();
+    cell.appendChild(dn);
+
+    const show = 3;
+    dayEvs.slice(0,show).forEach(ev => {
+      const c = COLORS[ev.col];
+      const p = document.createElement('div');
+      p.className = 'pill';
+      p.style.background = c.bg;
+      p.style.color = c.hex;
+      p.textContent = (ev.time ? ev.time+' ' : '') + ev.title;
+      p.title = ev.title + (ev.note?'\n'+ev.note:'');
+      p.onclick = e => { e.stopPropagation(); openEdit(ev.id); };
+      cell.appendChild(p);
+    });
+    if (dayEvs.length > show) {
+      const x = document.createElement('div');
+      x.className = 'xmore';
+      x.textContent = `+${dayEvs.length-show} more`;
+      cell.appendChild(x);
+    }
+    grid.appendChild(cell);
+  }
+
+  for (let i=0;i<startOffset;i++) addCell(new Date(cur.y,cur.m,-startOffset+i+1),true);
+  for (let d=1;d<=last.getDate();d++) addCell(new Date(cur.y,cur.m,d),false);
+  const tail = 42-(startOffset+last.getDate());
+  for (let i=1;i<=tail;i++) addCell(new Date(cur.y,cur.m+1,i),true);
+}
+
+function shiftMonth(d) {
+  cur.m+=d;
+  if(cur.m>11){cur.m=0;cur.y++}
+  if(cur.m<0){cur.m=11;cur.y--}
+  renderGrid();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function buildColorPicker() {
+  document.getElementById('cpicks').innerHTML = COLORS.map((c,i)=>
+    `<div class="cpick${i===selCol?' sel':''}" style="background:${c.hex}" title="${c.name}"
+      onclick="pickCol(${i})"></div>`).join('');
+}
+function pickCol(i){ selCol=i; buildColorPicker(); }
+
+function openNew(ds) {
+  editId = null; selCol = 0;
+  document.getElementById('mHead').textContent = '✨ New Event';
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fDate').value = ds || todayStr();
+  document.getElementById('fTime').value = '';
+  document.getElementById('fNote').value = '';
+  document.getElementById('bDel').style.display='none';
+  buildColorPicker();
+  document.getElementById('overlay').classList.add('on');
+  setTimeout(()=>document.getElementById('fTitle').focus(),120);
+}
+
+function openEdit(id) {
+  const ev = evs.find(e=>e.id===id); if(!ev)return;
+  editId=id; selCol=ev.col||0;
+  document.getElementById('mHead').textContent = '✏️ Edit Event';
+  document.getElementById('fTitle').value = ev.title;
+  document.getElementById('fDate').value = ev.date;
+  document.getElementById('fTime').value = ev.time||'';
+  document.getElementById('fNote').value = ev.note||'';
+  document.getElementById('bDel').style.display='';
+  buildColorPicker();
+  document.getElementById('overlay').classList.add('on');
+}
+
+function closeModal(){ document.getElementById('overlay').classList.remove('on'); }
+function bgClose(e){ if(e.target===document.getElementById('overlay')) closeModal(); }
+
+function saveEv() {
+  const title = document.getElementById('fTitle').value.trim();
+  const date  = document.getElementById('fDate').value;
+  if(!title||!date){
+    document.getElementById('fTitle').classList.add('shake');
+    document.getElementById('fTitle').style.borderColor='#ff6b6b';
+    setTimeout(()=>{
+      document.getElementById('fTitle').classList.remove('shake');
+      document.getElementById('fTitle').style.borderColor='';
+    },600);
+    return;
+  }
+  const ev = { id: editId||Date.now().toString(), title, date,
+    time: document.getElementById('fTime').value,
+    col: selCol,
+    note: document.getElementById('fNote').value.trim() };
+  if(editId) evs = evs.map(e=>e.id===editId?ev:e);
+  else evs.push(ev);
+  persist(); closeModal(); renderGrid();
+}
+
+function deleteEv(){
+  evs=evs.filter(e=>e.id!==editId);
+  persist(); closeModal(); renderGrid();
+}
+
+
+// ── DAY POPUP ────────────────────────────────────────────────────────────────
+function showDayPopup(ds){
+  const popup = document.getElementById('dayPopup');
+  const list = document.getElementById('dayEvents');
+  const title = document.getElementById('dayPopupTitle');
+  const addBtn = document.getElementById('dayAddBtn');
+
+  const d = new Date(ds);
+  title.textContent = d.toLocaleDateString('en-US', {
+    weekday:'long',
+    day:'numeric',
+    month:'long'
+  });
+
+  const dayEvs = evs
+    .filter(e => e.date === ds && activeFilters.has(e.col))
+    .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+
+  if(dayEvs.length === 0){
+    list.innerHTML = `<div class="day-empty">No events yet ✨</div>`;
+  } else {
+    list.innerHTML = dayEvs.map(ev=>{
+      const c = COLORS[ev.col];
+      return `
+      <div class="day-item"
+        style="background:${c.bg};border-color:${c.hex}22"
+        onclick="openEdit('${ev.id}')">
+        <div class="day-item-time">${ev.time || 'All Day'}</div>
+        <div class="day-item-title" style="color:${c.hex}">${ev.title}</div>
+        ${ev.note ? `<div class="day-item-note">${ev.note}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  addBtn.onclick = () => {
+    hideDayPopup();
+    openNew(ds);
+  };
+
+  popup.classList.add('on');
+}
+
+function hideDayPopup(){
+  document.getElementById('dayPopup').classList.remove('on');
+}
+
+function closeDayPopup(e){
+  if(e.target.id === 'dayPopup') hideDayPopup();
+}
+
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderChips();
+renderGrid();
+</script>
+</body>
+</html>
