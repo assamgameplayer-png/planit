@@ -26,7 +26,7 @@ Coming soon via GitHub Pages.
 Code licensed under MIT License.
 ## Preview
 
-![PLANIT Home](screenshots/home.png)
+![PLANIT Home](Home.png)
 
 ![PLANIT Popup](screenshots/popup.png)
 
