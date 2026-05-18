@@ -25,4 +25,4 @@ Coming soon via GitHub Pages.
 
 Code licensed under MIT License.
 
-Design assets and branding licensed under CC BY-NC 4.0.
+
