@@ -28,5 +28,5 @@ Code licensed under MIT License.
 
 ![PLANIT Home](Home.png)
 
-![PLANIT Popup](screenshots/popup.png)
+![PLANIT Popup](screenshots/Popup.png)
 
